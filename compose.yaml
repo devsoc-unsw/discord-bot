@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - '6991:6991'
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/mydatabase # Connect to MongoDB
+    depends_on:
+      - mongodb # Ensure MongoDB starts before backend
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+
+  client:
+    build: ./client
+    ports:
+      - '3172:3172'
+    environment:
+      - DB_URI=mongodb://mongodb:27017/mydatabase
+    depends_on:
+      - backend
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongodb_data:/data/db
+
+volumes:
+  mongodb_data:
