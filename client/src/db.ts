@@ -1,10 +1,10 @@
-import assert from 'node:assert/strict'
+import assert from 'node:assert/strict';
 
-import { MongoClient, ObjectId } from 'mongodb'
-import { configDotenv } from 'dotenv'
+import { MongoClient, ObjectId } from 'mongodb';
+import { configDotenv } from 'dotenv';
 
-configDotenv()
-assert(process.env.DB_URI)
+configDotenv();
+assert(process.env.DB_URI);
 
 export class DBEvent {
   constructor(
@@ -16,6 +16,6 @@ export class DBEvent {
   ) {}
 }
 
-const mongo = new MongoClient(process.env.DB_URI)
-await mongo.connect()
-export const dbEvents = mongo.db('eventdb').collection<DBEvent>('events')
+const mongo = new MongoClient(process.env.DB_URI);
+await mongo.connect();
+export const dbEvents = mongo.db('eventdb').collection<DBEvent>('events');

@@ -1,4 +1,4 @@
-import assert from 'node:assert/strict'
+import assert from 'node:assert/strict';
 import {
   Client,
   EmbedBuilder,
@@ -7,113 +7,117 @@ import {
   REST,
   Routes,
   SlashCommandBuilder,
-} from 'discord.js'
-import { configDotenv } from 'dotenv'
-import { DBEvent, dbEvents } from './db'
+} from 'discord.js';
+import { configDotenv } from 'dotenv';
+import { DBEvent, dbEvents } from './db';
+import axios from 'axios';
 
-configDotenv()
+configDotenv();
 
-await loadCommands()
+await loadCommands();
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] })
+const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 client.once(Events.ClientReady, (c) => {
-  console.log(`Logged in and serving as: ${c.user.tag}`)
-  console.log(`\\    /\\\n )  ( ')\n(  /  )\n \\(__)|`)
-})
+  console.log(`Logged in and serving as: ${c.user.tag}`);
+  console.log(`\\    /\\\n )  ( ')\n(  /  )\n \\(__)|`);
+  axios.get(process.env.BACKEND_URL as string).then((v) => {
+    console.log(v.data);
+  });
+});
 
 client.on(Events.InteractionCreate, async (i) => {
   if (i.isChatInputCommand()) {
     if (i.commandName == 'event') {
       if (i.options.getSubcommandGroup() === null) {
         if (i.options.getSubcommand() === 'create') {
-          await i.deferReply({ flags: 'Ephemeral' })
+          await i.deferReply({ flags: 'Ephemeral' });
 
-          const name = i.options.getString('event', true)
-          const existing = await dbEvents.findOne({ name })
+          const name = i.options.getString('event', true);
+          const existing = await dbEvents.findOne({ name });
           if (existing !== null) {
-            await i.editReply('Error: event already exists')
-            return
+            await i.editReply('Error: event already exists');
+            return;
           }
 
-          const unretired = await dbEvents.countDocuments({ retired: false })
+          const unretired = await dbEvents.countDocuments({ retired: false });
           if (unretired >= 25) {
             await i.editReply(
               'Error: too many active events, please retire or delete some',
-            )
-            return
+            );
+            return;
           }
 
-          await dbEvents.insertOne(new DBEvent(name, [], [], false))
-          await loadCommands()
-          await i.editReply('Event created')
+          await dbEvents.insertOne(new DBEvent(name, [], [], false));
+          await loadCommands();
+          await i.editReply('Event created');
         } else if (i.options.getSubcommand() === 'delete') {
-          await i.deferReply({ flags: 'Ephemeral' })
+          await i.deferReply({ flags: 'Ephemeral' });
 
-          const name = i.options.getString('event', true)
-          const existing = await dbEvents.findOne({ name })
+          const name = i.options.getString('event', true);
+          const existing = await dbEvents.findOne({ name });
           if (existing === null) {
-            await i.editReply('Error: event does not exist')
-            return
+            await i.editReply('Error: event does not exist');
+            return;
           }
 
-          await dbEvents.deleteOne({ name })
-          await loadCommands()
-          await i.editReply('Event deleted')
+          await dbEvents.deleteOne({ name });
+          await loadCommands();
+          await i.editReply('Event deleted');
         } else if (i.options.getSubcommand() === 'retire') {
-          await i.deferReply({ flags: 'Ephemeral' })
+          await i.deferReply({ flags: 'Ephemeral' });
 
-          const name = i.options.getString('event', true)
-          const existing = await dbEvents.findOne({ name })
+          const name = i.options.getString('event', true);
+          const existing = await dbEvents.findOne({ name });
           if (existing === null) {
-            await i.editReply('Error: event does not exist')
-            return
+            await i.editReply('Error: event does not exist');
+            return;
           } else if (existing.retired) {
-            await i.editReply('Error: event is already retired')
-            return
+            await i.editReply('Error: event is already retired');
+            return;
           }
 
-          await dbEvents.updateOne({ name }, { $set: { retired: true } })
-          await loadCommands()
-          await i.editReply('Event retired')
+          await dbEvents.updateOne({ name }, { $set: { retired: true } });
+          await loadCommands();
+          await i.editReply('Event retired');
         } else if (i.options.getSubcommand() === 'unretire') {
-          await i.deferReply({ flags: 'Ephemeral' })
+          await i.deferReply({ flags: 'Ephemeral' });
 
-          const name = i.options.getString('event', true)
-          const existing = await dbEvents.findOne({ name })
+          const name = i.options.getString('event', true);
+          const existing = await dbEvents.findOne({ name });
           if (existing === null) {
-            await i.editReply('Erorr: event does not exist')
-            return
+            await i.editReply('Erorr: event does not exist');
+            return;
           } else if (!existing.retired) {
-            await i.editReply('Error: event is not retired')
-            return
+            await i.editReply('Error: event is not retired');
+            return;
           }
 
-          const unretired = await dbEvents.countDocuments({ retired: false })
+          const unretired = await dbEvents.countDocuments({ retired: false });
           if (unretired >= 25) {
             await i.editReply(
               'Error: too many active events, please retire or delete some',
-            )
-            return
+            );
+            return;
           }
 
-          await dbEvents.updateOne({ name }, { $set: { retired: false } })
-          await loadCommands()
-          await i.editReply('Event unretired')
+          await dbEvents.updateOne({ name }, { $set: { retired: false } });
+          await loadCommands();
+          await i.editReply('Event unretired');
         } else if (i.options.getSubcommand() === 'list') {
-          await i.deferReply()
+          await i.deferReply();
 
-          const events = await dbEvents.find({ retired: false }).toArray()
+          const events = await dbEvents.find({ retired: false }).toArray();
           if (events.length === 0) {
-            await i.editReply('No events')
-            return
+            await i.editReply('No events');
+            return;
           }
 
           await i.editReply({
             embeds: events.map((event) => {
-              const ports = new Map<string, string[]>()
+              const ports = new Map<string, string[]>();
               for (const [user, port] of event.users) {
-                if (!ports.has(port)) ports.set(port, [])
-                ports.get(port)?.push(user)
+                if (!ports.has(port)) ports.set(port, []);
+                ports.get(port)?.push(user);
               }
 
               return new EmbedBuilder()
@@ -137,24 +141,24 @@ client.on(Events.InteractionCreate, async (i) => {
                       event.threads.map((t) => `<#${t}>`).join('\n') ||
                       'No threads',
                   },
-                )
+                );
             }),
-          })
+          });
         } else if (i.options.getSubcommand() === 'listretired') {
-          await i.deferReply()
+          await i.deferReply();
 
-          const events = await dbEvents.find({ retired: true }).toArray()
+          const events = await dbEvents.find({ retired: true }).toArray();
           if (events.length === 0) {
-            await i.editReply('No events')
-            return
+            await i.editReply('No events');
+            return;
           }
 
           await i.editReply({
             embeds: events.map((event) => {
-              const ports = new Map<string, string[]>()
+              const ports = new Map<string, string[]>();
               for (const [user, port] of event.users) {
-                if (!ports.has(port)) ports.set(port, [])
-                ports.get(port)?.push(user)
+                if (!ports.has(port)) ports.set(port, []);
+                ports.get(port)?.push(user);
               }
 
               return new EmbedBuilder()
@@ -178,80 +182,80 @@ client.on(Events.InteractionCreate, async (i) => {
                       event.threads.map((t) => `<#${t}>`).join('\n') ||
                       'No threads',
                   },
-                )
+                );
             }),
-          })
+          });
         } else if (i.options.getSubcommand() === 'ping') {
-          await i.deferReply({ flags: 'Ephemeral' })
+          await i.deferReply({ flags: 'Ephemeral' });
 
-          const name = i.options.getString('event', true)
-          const port = i.options.getString('port', true)
+          const name = i.options.getString('event', true);
+          const port = i.options.getString('port', true);
 
-          const event = await dbEvents.findOne({ name })
+          const event = await dbEvents.findOne({ name });
           if (event === null) {
-            await i.editReply('Error: event not found')
-            return
+            await i.editReply('Error: event not found');
+            return;
           }
 
-          const toPing = event.users.filter(([_, p]) => p === port)
+          const toPing = event.users.filter(([_, p]) => p === port);
           if (toPing.length === 0) {
-            await i.editReply('Error: no users in the event has that role')
-            return
+            await i.editReply('Error: no users in the event has that role');
+            return;
           }
 
-          await i.deleteReply()
-          await i.followUp(toPing.map(([id]) => `<@${id}>`).join('\n'))
+          await i.deleteReply();
+          await i.followUp(toPing.map(([id]) => `<@${id}>`).join('\n'));
         }
       } else if (i.options.getSubcommandGroup() === 'user') {
         if (i.options.getSubcommand() === 'add') {
-          await i.deferReply({ flags: 'Ephemeral' })
+          await i.deferReply({ flags: 'Ephemeral' });
 
-          const name = i.options.getString('event', true)
-          const user = i.options.getUser('user', true)
-          const port = i.options.getString('port', true)
+          const name = i.options.getString('event', true);
+          const user = i.options.getUser('user', true);
+          const port = i.options.getString('port', true);
 
-          const event = await dbEvents.findOne({ name })
+          const event = await dbEvents.findOne({ name });
           if (event === null) {
-            await i.editReply('Error: event not found')
-            return
+            await i.editReply('Error: event not found');
+            return;
           }
 
           await dbEvents.updateOne(
             { name },
             { $push: { users: [user.id, port] } },
-          )
-          await i.editReply('User added')
+          );
+          await i.editReply('User added');
         }
       } else if (i.options.getSubcommandGroup() === 'thread') {
         if (i.options.getSubcommand() === 'add') {
-          await i.deferReply({ flags: 'Ephemeral' })
+          await i.deferReply({ flags: 'Ephemeral' });
 
-          const name = i.options.getString('event', true)
-          const thread = i.options.getChannel('thread', true)
+          const name = i.options.getString('event', true);
+          const thread = i.options.getChannel('thread', true);
 
-          const event = await dbEvents.findOne({ name })
+          const event = await dbEvents.findOne({ name });
           if (event === null) {
-            await i.editReply('Error: event not found')
-            return
+            await i.editReply('Error: event not found');
+            return;
           }
 
-          await dbEvents.updateOne({ name }, { $push: { threads: thread.id } })
-          await i.editReply('Thread added')
+          await dbEvents.updateOne({ name }, { $push: { threads: thread.id } });
+          await i.editReply('Thread added');
         }
       }
     }
   }
-})
+});
 
-client.login(process.env.DISCORD_TOKEN)
+client.login(process.env.DISCORD_TOKEN);
 
 async function loadCommands() {
-  const events = await dbEvents.find({ retired: false }).toArray()
+  const events = await dbEvents.find({ retired: false }).toArray();
 
-  assert(process.env.DISCORD_TOKEN)
-  assert(process.env.CLIENT_ID)
-  assert(process.env.GUILD_ID)
-  assert(process.env.DB_URI)
+  assert(process.env.DISCORD_TOKEN);
+  assert(process.env.CLIENT_ID);
+  assert(process.env.GUILD_ID);
+  assert(process.env.DB_URI);
 
   await new REST()
     .setToken(process.env.DISCORD_TOKEN)
@@ -435,5 +439,5 @@ async function loadCommands() {
             ),
         ].map((c) => c.toJSON()),
       },
-    )
+    );
 }
