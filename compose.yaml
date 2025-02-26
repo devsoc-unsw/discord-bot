@@ -6,9 +6,9 @@ services:
     ports:
       - '6991:6991'
     environment:
-      - MONGO_URI=mongodb://mongodb:27017/mydatabase # Connect to MongoDB
+      - MONGO_URI=mongodb://mongodb:27017/mydatabase
     depends_on:
-      - mongodb # Ensure MongoDB starts before backend
+      - mongodb
     volumes:
       - ./backend:/app
       - /app/node_modules
@@ -19,6 +19,7 @@ services:
       - '3172:3172'
     environment:
       - DB_URI=mongodb://mongodb:27017/mydatabase
+      - BACKEND_URL=http://backend:6991
     depends_on:
       - backend
     volumes:
