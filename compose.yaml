@@ -7,6 +7,7 @@ services:
       - '6991:6991'
     environment:
       - MONGO_URI=mongodb://mongodb:27017/mydatabase
+      - DEFAULT_PORT=6991
     depends_on:
       - mongodb
     volumes:

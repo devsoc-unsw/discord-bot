@@ -1,9 +1,10 @@
 import express, { Request, Response } from 'express';
 
 const app = express();
-const port = 6991;
+const port = process.env.DEFAULT_PORT;
 
 app.get('/', (req: Request, res: Response) => {
+  const msg = 'PENNY BOT Backend';
   res.send('Hello, Express with TypeScript!');
 });
 
