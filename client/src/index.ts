@@ -5,12 +5,18 @@ import {
   Events,
   GatewayIntentBits,
   REST,
+  RESTPostAPIChatInputApplicationCommandsJSONBody,
   Routes,
   SlashCommandBuilder,
 } from 'discord.js';
 import { configDotenv } from 'dotenv';
 import { DBEvent, dbEvents } from './db';
 import axios from 'axios';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'node:url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 configDotenv();
 
@@ -250,6 +256,44 @@ client.on(Events.InteractionCreate, async (i) => {
 client.login(process.env.DISCORD_TOKEN);
 
 async function loadCommands() {
+  const commands: RESTPostAPIChatInputApplicationCommandsJSONBody[] = [];
+  const foldersPath = path.join(__dirname, '../commands');
+  const commandFolders = fs.readdirSync(foldersPath);
+  for (const folder of commandFolders) {
+    // Grab all the command files from the commands directory you created earlier
+    const commandsPath = path.join(foldersPath, folder);
+    const commandFiles = fs
+      .readdirSync(commandsPath)
+      .filter((file) => file === 'index.ts');
+    for (const file of commandFiles) {
+      let filePath = path.relative(__dirname, path.join(commandsPath, file));
+      filePath = filePath.replace('.ts', '');
+      const command = await import(filePath);
+      if ('data' in command.default) {
+        commands.push((command.default.data as SlashCommandBuilder).toJSON());
+      } else {
+        console.log(
+          `[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`,
+        );
+      }
+    }
+  }
+
+  await new REST()
+    .setToken(process.env.DISCORD_TOKEN as string)
+    .put(
+      Routes.applicationGuildCommands(
+        process.env.CLIENT_ID as string,
+        process.env.GUILD_ID as string,
+      ),
+      {
+        body: commands,
+      },
+    );
+}
+
+/*
+async function loadCommands() {
   const events = await dbEvents.find({ retired: false }).toArray();
 
   assert(process.env.DISCORD_TOKEN);
@@ -440,4 +484,4 @@ async function loadCommands() {
         ].map((c) => c.toJSON()),
       },
     );
-}
+}*/
