@@ -5,7 +5,7 @@ const port = process.env.DEFAULT_PORT;
 
 app.get('/', (req: Request, res: Response) => {
   const msg = 'PENNY BOT Backend';
-  res.send('Hello, Express with TypeScript!');
+  res.send(msg);
 });
 
 app.listen(port, () => {

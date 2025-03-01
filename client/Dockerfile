@@ -8,4 +8,4 @@ RUN npm i
 
 COPY . .
 
-CMD ["npx", "tsx", "src/index.ts"]
+CMD ["npm", "run", "dev"]
