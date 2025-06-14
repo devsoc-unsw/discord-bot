@@ -1,19 +1,18 @@
 {
+  "type": "module",
   "packageManager": "pnpm@10.12.1+sha512.f0dda8580f0ee9481c5c79a1d927b9164f2c478e90992ad268bbb2465a736984391d6333d2c327913578b2804af33474ca554ba29c04a8b13060a717675ae3ac",
   "dependencies": {
     "discord.js": "^14.19.3",
     "dotenv": "^16.5.0",
     "nodemon": "^3.1.10"
   },
-  "devDependencies": {
-    "@types/node": "^24.0.1",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.8.3"
-  },
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts",
+    "dev": "nodemon --watch 'src/**/*.ts' --exec 'tsx' src/index.ts",
     "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "tsx": "^4.20.3"
   }
 }
