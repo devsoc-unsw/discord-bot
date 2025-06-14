@@ -24,10 +24,13 @@ jobs:
           version: 10
 
       - name: Install dependencies
+        working-directory: ./client
         run: pnpm install
 
       - name: Build
+        working-directory: ./client
         run: pnpm build
 
       - name: Type check
+        working-directory: ./client
         run: pnpm typecheck
