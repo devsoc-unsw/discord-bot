@@ -2,7 +2,7 @@ import {
   ChatInputCommandInteraction,
   SlashCommandSubcommandBuilder,
 } from 'discord.js';
-import { Command } from '../../../types/commands';
+import { Command } from '../../../types/commands.js';
 
 export const execute = async (input: ChatInputCommandInteraction) => {
   console.log('thread add executed');

@@ -1,6 +1,6 @@
 import { Client, Events, GatewayIntentBits, REST, Routes } from 'discord.js';
 import { configDotenv } from 'dotenv';
-import { loadCommands } from './util/loadCommands';
+import { loadCommands } from './util/loadCommands.js';
 
 configDotenv();
 

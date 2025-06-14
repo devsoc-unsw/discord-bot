@@ -6,7 +6,7 @@ import {
 import { readdir, stat } from 'fs/promises';
 import path, { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { Command } from '../types/commands';
+import { Command } from '../types/commands.js';
 import assert from 'assert';
 
 type loadCommandReturn =
