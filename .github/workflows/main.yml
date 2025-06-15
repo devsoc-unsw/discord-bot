@@ -20,7 +20,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v2
         with:
-          package_json_file: 'package.json'
+          package_json_file: 'client/package.json'
           run_install: false
           version: 10
 
@@ -29,7 +29,7 @@ jobs:
         with:
           node-version: '22'
           cache: 'pnpm'
-          cache-dependency-path: './pnpm-lock.yaml'
+          cache-dependency-path: 'client/pnpm-lock.yaml'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
