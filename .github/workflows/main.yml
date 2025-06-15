@@ -17,19 +17,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'pnpm'
-          cache-dependency-path: './pnpm-lock.yaml'
-
       - name: Install pnpm
         uses: pnpm/action-setup@v2
         with:
           package_json_file: 'package.json'
           run_install: false
           version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+          cache-dependency-path: './pnpm-lock.yaml'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
