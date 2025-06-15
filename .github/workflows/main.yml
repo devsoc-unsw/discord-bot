@@ -21,17 +21,21 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: 'pnpm'
+          cache-dependency-path: './pnpm-lock.yaml'
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2
         with:
+          package_json_file: 'package.json'
+          run_install: false
           version: 10
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Build
-        run: pnpm build
+        run: pnpm run build
 
       - name: Type check
         run: pnpm typecheck
