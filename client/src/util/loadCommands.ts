@@ -1,12 +1,13 @@
 import {
   RESTPostAPIChatInputApplicationCommandsJSONBody,
   SlashCommandBuilder,
+  SlashCommandSubcommandBuilder,
   SlashCommandSubcommandGroupBuilder,
 } from 'discord.js';
 import { readdir, stat } from 'fs/promises';
 import path, { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { Command } from '../types/commands.js';
+import { Command, CommandGroup } from '../types/commands.js';
 import assert from 'assert';
 
 type loadCommandReturn =
@@ -28,14 +29,12 @@ type loadCommandReturn =
  *
  */
 
-export async function loadCommands(): Promise<
-  RESTPostAPIChatInputApplicationCommandsJSONBody[]
-> {
+export async function loadCommands(
+  commandData: Map<String, Command | CommandGroup>
+): Promise<RESTPostAPIChatInputApplicationCommandsJSONBody[]> {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = dirname(__filename);
   const commandsDir = join(__dirname, '..', 'commands');
-
-  //onsole.log(commandsDir);
 
   const modules = await readdir(commandsDir);
 
@@ -44,7 +43,8 @@ export async function loadCommands(): Promise<
   for (const module of modules) {
     const slashCommand = await loadCommandsFromDir(
       path.join(commandsDir, module),
-      1
+      1,
+      commandData
     );
     if (slashCommand) res.push((slashCommand as SlashCommandBuilder).toJSON());
   }
@@ -54,37 +54,68 @@ export async function loadCommands(): Promise<
 
 async function loadCommandsFromDir(
   dir: string,
-  depth: number
+  depth: number,
+  commandData: Map<String, Command | CommandGroup>
 ): Promise<loadCommandReturn> {
   const items = await readdir(dir);
+  const builder = builderRoot(depth);
+  const dirName = path.basename(dir);
 
-  let builder = builderRoot(depth);
+  const commandGroup: CommandGroup = {
+    name: dirName,
+    description: '',
+    subCommands: new Map(),
+    subGroups: new Map(),
+  };
 
   for (const item of items) {
-    const path = join(dir, item);
-    //console.log(path);
-    const stats = await stat(path);
+    const itemPath = join(dir, item);
+    const stats = await stat(itemPath);
 
     if (stats.isDirectory()) {
-      const subCommands = await loadCommandsFromDir(path, depth + 1);
-      assert(builder !== null);
-      (builder as SlashCommandBuilder).addSubcommandGroup(
-        subCommands as SlashCommandSubcommandGroupBuilder
+      const subGroup = await loadCommandsFromDir(
+        itemPath,
+        depth + 1,
+        commandData
       );
+      if (subGroup) {
+        (builder as SlashCommandBuilder).addSubcommandGroup(
+          subGroup as SlashCommandSubcommandGroupBuilder
+        );
+        const subgroupName = path.basename(itemPath);
+        const subgroup = commandData.get(subgroupName) as CommandGroup;
+        if (subgroup) {
+          commandGroup.subGroups.set(subgroupName, subgroup);
+          if (depth === 1) {
+            commandData.delete(subgroupName);
+          }
+        }
+      }
     } else if (item === 'group.ts') {
-      const groupData = await import(path);
+      const groupData = await import(itemPath);
       if (groupData.default) {
         builder
           ?.setName(groupData.default.name)
           .setDescription(groupData.default.description);
+        commandGroup.name = groupData.default.name;
+        commandGroup.description = groupData.default.description;
       }
-    } else if (item !== 'group.ts' && item.endsWith('.ts')) {
-      const command = await import(path);
+    } else if (item.endsWith('.ts') && item !== 'group.ts') {
+      const command = await import(itemPath);
       if (command.default) {
         builder?.addSubcommand(command.default.data);
+        const cmd: Command = {
+          data: command.default.data,
+          execute: command.default.execute,
+        };
+        const cmdName = (command.default.data as SlashCommandSubcommandBuilder)
+          .name;
+        commandGroup.subCommands.set(cmdName, cmd);
       }
     }
   }
+
+  commandData.set(commandGroup.name, commandGroup);
 
   return builder;
 }

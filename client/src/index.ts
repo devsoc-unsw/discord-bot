@@ -1,22 +1,36 @@
-import { Client, Events, GatewayIntentBits, REST, Routes } from 'discord.js';
+import {
+  CacheType,
+  Client,
+  Events,
+  GatewayIntentBits,
+  Interaction,
+  REST,
+  RESTPostAPIChatInputApplicationCommandsJSONBody,
+  Routes,
+} from 'discord.js';
 import { configDotenv } from 'dotenv';
 import { loadCommands } from './util/loadCommands.js';
+import { Command, CommandGroup } from './types/commands.js';
 
 configDotenv();
-
 const token = process.env.DISCORD_TOKEN;
 
-if (!token) {
-  throw new Error('DISCORD_TOKEN is not set');
-}
+if (!token) throw new Error('DISCORD_TOKEN is not set');
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+let commandData: Map<String, CommandGroup | Command> = new Map();
 
 client.once(Events.ClientReady, (c) => {
   console.log(`Ready! Logged in as ${c.user.tag}`);
 });
 
+client.on(Events.InteractionCreate, async (i: Interaction<CacheType>) => {
+  console.log(commandData);
+});
+
 async function main() {
+  const commands = await loadCommands(commandData);
+
   await new REST()
     .setToken(token as string)
     .put(
@@ -25,11 +39,11 @@ async function main() {
         process.env.GUILD_ID as string
       ),
       {
-        body: await loadCommands(),
+        body: commands,
       }
     );
 
   await client.login(token);
 }
 
-await main();
+main().then((err) => console.error(err));
