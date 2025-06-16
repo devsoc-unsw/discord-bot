@@ -32,8 +32,12 @@ jobs:
         with:
           context: client
           push: false
+          tags: discord-bot:ci-test
           target: development
           platforms: linux/amd64
           file: client/Dockerfile
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: 'Test login'
+        run: docker run --rm discord-bot:ci-test
