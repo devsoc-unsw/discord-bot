@@ -1,13 +1,5 @@
-import {
-  ChatInputCommandInteraction,
-  Client,
-  SlashCommandSubcommandBuilder,
-} from 'discord.js';
-import { Command } from '../../../types/commands.js';
-import {
-  CommandBuilder,
-  generateCommand,
-} from '../../../util/generateCommand.js';
+import { ChatInputCommandInteraction, Client } from 'discord.js';
+import { CommandBuilder, generateCommand } from '../../../util/generateCommand';
 
 export const execute = async (
   _input: ChatInputCommandInteraction,

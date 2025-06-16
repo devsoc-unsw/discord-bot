@@ -8,9 +8,9 @@ import {
   Routes,
 } from 'discord.js';
 import { configDotenv } from 'dotenv';
-import { Command, CommandGroup } from './types/commands.js';
-import './commands/events/thread/index.js';
-import { loadCommands } from './util/loadCommands.js';
+import { Command, CommandGroup } from './types/commands';
+import './commands/events/thread/index';
+import { loadCommands } from './util/loadCommands';
 
 configDotenv();
 
@@ -32,6 +32,8 @@ async function registerCommands(
 ): Promise<Map<String, CommandGroup | Command>> {
   const commandMeta = await loadCommands();
 
+  //console.log(commandMeta.jsonData);
+  //console.log(commandMeta.jsonData[0].options);
   await new REST()
     .setToken(token)
     .put(
@@ -64,6 +66,8 @@ client.on(Events.InteractionCreate, async (i: Interaction<CacheType>) => {
   /***
    * TODO!
    */
+
+  console.log(commandMap);
 });
 
 async function main() {
@@ -73,6 +77,7 @@ async function main() {
 
     if (process.env.TEST_MODE !== 'true') {
       commandMap = await registerCommands(token);
+      //console.log(commandMap);
     }
 
     await client.login(token);
@@ -82,4 +87,4 @@ async function main() {
   }
 }
 
-await main();
+main().catch(console.error);
