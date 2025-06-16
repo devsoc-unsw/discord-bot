@@ -5,11 +5,9 @@ import {
   GatewayIntentBits,
   Interaction,
   REST,
-  RESTPostAPIChatInputApplicationCommandsJSONBody,
   Routes,
 } from 'discord.js';
 import { configDotenv } from 'dotenv';
-//import { loadCommands } from './util/loadCommands.js';
 import { Command, CommandGroup } from './types/commands.js';
 import './commands/events/thread/index.js';
 import { loadCommands } from './util/loadCommands.js';
@@ -24,6 +22,12 @@ let commandMap: Map<String, CommandGroup | Command> = new Map();
 
 client.once(Events.ClientReady, (c) => {
   console.log(`Ready! Logged in as ${c.user.tag}`);
+
+  if (process.env.TEST_MODE === 'true') {
+    client.destroy();
+    console.log('Validated login is functional.');
+    process.exit(0);
+  }
 });
 
 client.on(Events.InteractionCreate, async (i: Interaction<CacheType>) => {
