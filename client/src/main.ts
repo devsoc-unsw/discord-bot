@@ -13,9 +13,39 @@ import './commands/events/thread/index.js';
 import { loadCommands } from './util/loadCommands.js';
 
 configDotenv();
-const token = process.env.DISCORD_TOKEN;
 
-if (!token) throw new Error('DISCORD_TOKEN is not set');
+function validateEnv() {
+  const requiredEnvVars = ['DISCORD_TOKEN', 'CLIENT_ID', 'GUILD_ID'];
+  const missingVars = requiredEnvVars.filter(
+    (varName) => !process.env[varName]
+  );
+
+  if (missingVars.length > 0) {
+    throw new Error(
+      `Missing required environment variables: ${missingVars.join(', ')}`
+    );
+  }
+}
+
+async function registerCommands(
+  token: string
+): Promise<Map<String, CommandGroup | Command>> {
+  const commandMeta = await loadCommands();
+
+  await new REST()
+    .setToken(token)
+    .put(
+      Routes.applicationGuildCommands(
+        process.env.CLIENT_ID!,
+        process.env.GUILD_ID!
+      ),
+      {
+        body: commandMeta.jsonData,
+      }
+    );
+
+  return commandMeta.commandMap;
+}
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 let commandMap: Map<String, CommandGroup | Command> = new Map();
@@ -31,27 +61,25 @@ client.once(Events.ClientReady, (c) => {
 });
 
 client.on(Events.InteractionCreate, async (i: Interaction<CacheType>) => {
-  //console.log((commandMap.get('thread') as CommandGroup).builder);
+  /***
+   * TODO!
+   */
 });
 
 async function main() {
-  const commandMeta = await loadCommands();
+  try {
+    validateEnv();
+    const token = process.env.DISCORD_TOKEN!;
 
-  await new REST()
-    .setToken(token as string)
-    .put(
-      Routes.applicationGuildCommands(
-        process.env.CLIENT_ID as string,
-        process.env.GUILD_ID as string
-      ),
-      {
-        body: commandMeta.jsonData,
-      }
-    );
+    if (process.env.TEST_MODE !== 'true') {
+      commandMap = await registerCommands(token);
+    }
 
-  commandMap = commandMeta.commandMap;
-
-  await client.login(token);
+    await client.login(token);
+  } catch (error) {
+    console.error('Failed to start the bot:', error);
+    process.exit(1);
+  }
 }
 
-main().then((err) => console.error(err));
+await main();
