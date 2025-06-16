@@ -1,28 +1,26 @@
 import {
   ChatInputCommandInteraction,
+  Client,
   SlashCommandSubcommandBuilder,
 } from 'discord.js';
 import { Command } from '../../../types/commands.js';
+import {
+  CommandBuilder,
+  generateCommand,
+} from '../../../util/generateCommand.js';
 
-export const execute = async (input: ChatInputCommandInteraction) => {
+export const execute = async (
+  _input: ChatInputCommandInteraction,
+  _client: Client
+) => {
   console.log('thread add executed');
 };
 
-export default {
-  data: new SlashCommandSubcommandBuilder()
-    .setName('add')
-    .setDescription('Add a thread')
-    .addStringOption((option) =>
-      option
-        .setRequired(true)
-        .setName('event')
-        .setDescription('Name of the event')
-        .setChoices([
-          {
-            name: 'test',
-            value: 'valueTest',
-          },
-        ])
-    ),
-  execute: execute,
-} as Command;
+const commandObj = generateCommand(
+  'add',
+  'Add a thread',
+  execute,
+  CommandBuilder.SUBCOMMAND
+);
+
+export default commandObj;
