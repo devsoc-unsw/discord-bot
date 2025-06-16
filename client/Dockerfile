@@ -14,9 +14,11 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 
 # Copy package files
 COPY package*.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile --prod
+RUN pnpm install --frozen-lockfile
 
 # Copy source files
 COPY . .
 RUN pnpm build
+RUN pnpm prune --prod
+
 CMD ["pnpm", "start"]
