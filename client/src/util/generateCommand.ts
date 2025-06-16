@@ -4,7 +4,7 @@ import {
   SlashCommandBuilder,
   SlashCommandSubcommandBuilder,
 } from 'discord.js';
-import { Command } from '../types/commands.js';
+import { Command } from '../types/commands';
 
 export enum CommandBuilder {
   SLASH_COMMAND,

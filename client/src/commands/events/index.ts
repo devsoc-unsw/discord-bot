@@ -1,18 +1,18 @@
-import { SlashCommandBuilder } from 'discord.js';
 import { CommandGroup } from '../../types/commands.js';
 import {
   CommandGroupBuilder,
   generateCommandGroup,
 } from '../../util/generateCommandGroup.js';
-import { readImmediateFiles } from '../../util/loadCommands.js';
-import { dirname } from 'path';
+import { readImmediateFiles } from '../../util/loadCommands';
 
-const group = generateCommandGroup(
-  'event',
-  'Manages the events commands modules',
-  CommandGroupBuilder.SLASH_COMMAND
-);
+async function initialize(): Promise<CommandGroup> {
+  const group = generateCommandGroup(
+    'event',
+    'Manages the events commands modules',
+    CommandGroupBuilder.SLASH_COMMAND
+  );
+  await readImmediateFiles(__dirname, group);
+  return group;
+}
 
-await readImmediateFiles(dirname(import.meta.url), group);
-
-export default group;
+export default initialize();

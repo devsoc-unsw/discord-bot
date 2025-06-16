@@ -5,49 +5,86 @@ import {
   GatewayIntentBits,
   Interaction,
   REST,
-  RESTPostAPIChatInputApplicationCommandsJSONBody,
   Routes,
 } from 'discord.js';
 import { configDotenv } from 'dotenv';
-//import { loadCommands } from './util/loadCommands.js';
-import { Command, CommandGroup } from './types/commands.js';
-import './commands/events/thread/index.js';
-import { loadCommands } from './util/loadCommands.js';
+import { Command, CommandGroup } from './types/commands';
+import './commands/events/thread/index';
+import { loadCommands } from './util/loadCommands';
 
 configDotenv();
-const token = process.env.DISCORD_TOKEN;
 
-if (!token) throw new Error('DISCORD_TOKEN is not set');
+function validateEnv() {
+  const requiredEnvVars = ['DISCORD_TOKEN', 'CLIENT_ID', 'GUILD_ID'];
+  const missingVars = requiredEnvVars.filter(
+    (varName) => !process.env[varName]
+  );
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
-let commandMap: Map<String, CommandGroup | Command> = new Map();
+  if (missingVars.length > 0) {
+    throw new Error(
+      `Missing required environment variables: ${missingVars.join(', ')}`
+    );
+  }
+}
 
-client.once(Events.ClientReady, (c) => {
-  console.log(`Ready! Logged in as ${c.user.tag}`);
-});
-
-client.on(Events.InteractionCreate, async (i: Interaction<CacheType>) => {
-  //console.log((commandMap.get('thread') as CommandGroup).builder);
-});
-
-async function main() {
+async function registerCommands(
+  token: string
+): Promise<Map<String, CommandGroup | Command>> {
   const commandMeta = await loadCommands();
 
+  //console.log(commandMeta.jsonData);
+  //console.log(commandMeta.jsonData[0].options);
   await new REST()
-    .setToken(token as string)
+    .setToken(token)
     .put(
       Routes.applicationGuildCommands(
-        process.env.CLIENT_ID as string,
-        process.env.GUILD_ID as string
+        process.env.CLIENT_ID!,
+        process.env.GUILD_ID!
       ),
       {
         body: commandMeta.jsonData,
       }
     );
 
-  commandMap = commandMeta.commandMap;
-
-  await client.login(token);
+  return commandMeta.commandMap;
 }
 
-main().then((err) => console.error(err));
+const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+let commandMap: Map<String, CommandGroup | Command> = new Map();
+
+client.once(Events.ClientReady, (c) => {
+  console.log(`Ready! Logged in as ${c.user.tag}`);
+
+  if (process.env.TEST_MODE === 'true') {
+    client.destroy();
+    console.log('Validated login is functional.');
+    process.exit(0);
+  }
+});
+
+client.on(Events.InteractionCreate, async (i: Interaction<CacheType>) => {
+  /***
+   * TODO!
+   */
+
+  console.log(commandMap);
+});
+
+async function main() {
+  try {
+    validateEnv();
+    const token = process.env.DISCORD_TOKEN!;
+
+    if (process.env.TEST_MODE !== 'true') {
+      commandMap = await registerCommands(token);
+      //console.log(commandMap);
+    }
+
+    await client.login(token);
+  } catch (error) {
+    console.error('Failed to start the bot:', error);
+    process.exit(1);
+  }
+}
+
+main().catch(console.error);

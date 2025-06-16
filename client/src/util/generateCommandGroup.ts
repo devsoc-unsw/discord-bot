@@ -2,7 +2,7 @@ import {
   SlashCommandBuilder,
   SlashCommandSubcommandGroupBuilder,
 } from 'discord.js';
-import { CommandGroup } from '../types/commands.js';
+import { CommandGroup } from '../types/commands';
 
 export enum CommandGroupBuilder {
   SLASH_COMMAND,

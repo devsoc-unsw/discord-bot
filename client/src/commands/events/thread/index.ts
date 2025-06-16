@@ -1,18 +1,20 @@
-import { SlashCommandSubcommandGroupBuilder } from 'discord.js';
-import { readImmediateFiles } from '../../../util/loadCommands.js';
+import { readImmediateFiles } from '../../../util/loadCommands';
 import path from 'path';
-import { CommandGroup } from '../../../types/commands.js';
 import {
   CommandGroupBuilder,
   generateCommandGroup,
-} from '../../../util/generateCommandGroup.js';
+} from '../../../util/generateCommandGroup';
+import { CommandGroup } from '../../../types/commands';
 
-const group = generateCommandGroup(
-  'thread',
-  'manages threads',
-  CommandGroupBuilder.SUBCOMMAND_GROUP
-);
+async function initialize(): Promise<CommandGroup> {
+  const group = generateCommandGroup(
+    'thread',
+    'manages threads',
+    CommandGroupBuilder.SUBCOMMAND_GROUP
+  );
 
-await readImmediateFiles(path.dirname(import.meta.url), group);
+  await readImmediateFiles(__dirname, group);
+  return group;
+}
 
-export default group;
+export default initialize();
