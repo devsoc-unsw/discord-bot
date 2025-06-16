@@ -9,8 +9,10 @@ import {
   Routes,
 } from 'discord.js';
 import { configDotenv } from 'dotenv';
-import { loadCommands } from './util/loadCommands.js';
+//import { loadCommands } from './util/loadCommands.js';
 import { Command, CommandGroup } from './types/commands.js';
+import './commands/events/thread/index.js';
+import { loadCommands } from './util/loadCommands.js';
 
 configDotenv();
 const token = process.env.DISCORD_TOKEN;
@@ -18,18 +20,18 @@ const token = process.env.DISCORD_TOKEN;
 if (!token) throw new Error('DISCORD_TOKEN is not set');
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
-let commandData: Map<String, CommandGroup | Command> = new Map();
+let commandMap: Map<String, CommandGroup | Command> = new Map();
 
 client.once(Events.ClientReady, (c) => {
   console.log(`Ready! Logged in as ${c.user.tag}`);
 });
 
 client.on(Events.InteractionCreate, async (i: Interaction<CacheType>) => {
-  console.log(commandData);
+  //console.log((commandMap.get('thread') as CommandGroup).builder);
 });
 
 async function main() {
-  const commands = await loadCommands(commandData);
+  const commandMeta = await loadCommands();
 
   await new REST()
     .setToken(token as string)
@@ -39,9 +41,11 @@ async function main() {
         process.env.GUILD_ID as string
       ),
       {
-        body: commands,
+        body: commandMeta.jsonData,
       }
     );
+
+  commandMap = commandMeta.commandMap;
 
   await client.login(token);
 }
