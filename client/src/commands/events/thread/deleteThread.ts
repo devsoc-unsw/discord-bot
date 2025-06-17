@@ -5,7 +5,7 @@ export const execute = async (
   _input: ChatInputCommandInteraction,
   _client: Client
 ) => {
-  console.log('thread add executed');
+  console.log('thread delete executed');
 };
 
 const cmd = generateCommand(
