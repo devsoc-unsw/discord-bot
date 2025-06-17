@@ -1,7 +1,10 @@
-import { ChatInputCommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction, Client } from 'discord.js';
 import { CommandBuilder, generateCommand } from '../../util/generateCommand';
 
-const execute = async (input: ChatInputCommandInteraction) => {
+const execute = async (
+  _input: ChatInputCommandInteraction,
+  _client: Client
+) => {
   console.log('Event Create Command triggered!');
 };
 
