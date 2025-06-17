@@ -27,10 +27,5 @@ export function generateCommand(
 
   b.setName(name).setDescription(description);
 
-  return {
-    name,
-    description,
-    builder: b,
-    execute,
-  };
+  return new Command(b, name, description, execute);
 }

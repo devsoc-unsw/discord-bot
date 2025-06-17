@@ -21,11 +21,5 @@ export function generateCommandGroup(
 
   b.setName(name).setDescription(description);
 
-  return {
-    name: 'thread',
-    description: 'Manages threads',
-    subCommands: new Map(),
-    subGroups: new Map(),
-    builder: b,
-  };
+  return new CommandGroup(b, name, description);
 }
