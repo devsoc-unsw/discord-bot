@@ -52,11 +52,11 @@ async function registerCommands(
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 let commandMap: Map<String, CommandGroup | Command> = new Map();
 
-client.once(Events.ClientReady, (c) => {
+client.once(Events.ClientReady, async (c) => {
   console.log(`Ready! Logged in as ${c.user.tag}`);
 
   if (process.env.TEST_MODE === 'true') {
-    client.destroy();
+    await client.destroy();
     console.log('Validated login is functional.');
     process.exit(0);
   }
