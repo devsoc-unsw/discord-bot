@@ -11,6 +11,7 @@ import { configDotenv } from 'dotenv';
 import { Command, CommandGroup } from './types/commands';
 import './commands/events/thread/index';
 import { loadCommands } from './util/loadCommands';
+import { resolveCommand } from './util/commandResolver';
 
 configDotenv();
 
@@ -67,7 +68,9 @@ client.on(Events.InteractionCreate, async (i: Interaction<CacheType>) => {
    * TODO!
    */
 
-  console.log(commandMap);
+  if (i.isChatInputCommand()) {
+    await resolveCommand(i, client, commandMap);
+  }
 });
 
 async function main() {
