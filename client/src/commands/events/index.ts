@@ -1,8 +1,8 @@
-import { CommandGroup } from '../../types/commands.js';
+import { CommandGroup } from '../../types/commands';
 import {
   CommandGroupBuilder,
   generateCommandGroup,
-} from '../../util/generateCommandGroup.js';
+} from '../../util/generateCommandGroup';
 import { readImmediateFiles } from '../../util/loadCommands';
 
 async function initialize(): Promise<CommandGroup> {
