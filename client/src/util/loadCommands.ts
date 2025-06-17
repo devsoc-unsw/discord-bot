@@ -68,7 +68,7 @@ export async function readImmediateFiles(
       const commandData = await moduleExports.default;
       assert(commandData, `No default export found in ${itemPath}`);
       const def = commandData;
-      commandGroup.subCommands.set(def.name, def.builder);
+      commandGroup.subCommands.set(def.name, def);
       commandGroup.builder.addSubcommand(
         def.builder as SlashCommandSubcommandBuilder
       );
