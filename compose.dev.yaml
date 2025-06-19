@@ -2,6 +2,8 @@ version: '3.8'
 
 services:
   client:
+    depends_on:
+      - backend
     build:
       target: development
       context: ./client
@@ -13,3 +15,15 @@ services:
     volumes:
       - ./client:/app
       - /app/node_modules
+
+  backend:
+    build:
+      target: development
+      context: ./backend
+    ports:
+      - 8000:8000
+    volumes:
+      - ./backend:/app
+      - /app/.venv
+      - /app/__pycache__
+      - /app/.pytest_cache
