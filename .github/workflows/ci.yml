@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  build:
+  client-build:
     runs-on: ubuntu-latest
 
     defaults:
@@ -35,3 +35,25 @@ jobs:
 
       - name: Build
         run: pnpm run build
+
+  backend-build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "export PATH=\"$HOME/.local/bin:$PATH\"" >> $GITHUB_ENV
+      - name: Install dependencies
+        run: poetry install
+      - name: Check Poetry environment
+        run: poetry check
+      - name: Run tests
+        run: poetry run pytest
